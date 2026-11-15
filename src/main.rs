@@ -4,6 +4,7 @@ mod mc;
 mod modrinth;
 mod text_input;
 mod ui;
+mod update;
 
 use gpui::{
     AnyElement, App, Application, Bounds, Context, Entity, ExternalPaths, FontWeight,
@@ -28,6 +29,7 @@ const LOADERS: [(&str, &str); 4] = [
 
 fn main() {
     Application::new().run(|cx: &mut App| {
+        update::cleanup();
         ui::load_fonts(cx);
         TextInput::bind_keys(cx);
         cx.on_window_closed(|cx| {
@@ -72,6 +74,9 @@ struct Config {
     /// Ask before moving something to the trash.
     #[serde(default = "yes")]
     confirm_remove: bool,
+    /// Look for a new Hopper release at startup.
+    #[serde(default = "yes")]
+    check_updates: bool,
 }
 
 impl Default for Config {
@@ -82,6 +87,7 @@ impl Default for Config {
             loader: String::new(),
             identify: true,
             confirm_remove: true,
+            check_updates: true,
         }
     }
 }
@@ -136,6 +142,7 @@ struct Hopper {
     identifying: bool,
     /// The last lookup failed (usually offline).
     identify_failed: bool,
+    updater: Updater,
 
     // Modrinth tab
     search: Entity<TextInput>,
@@ -178,6 +185,7 @@ impl Hopper {
             checked: HashSet::new(),
             identifying: false,
             identify_failed: false,
+            updater: Updater::Idle,
             search,
             browse_kind: Kind::Mod,
             hits: Vec::new(),
@@ -202,6 +210,10 @@ impl Hopper {
         {
             Some(root) => this.attach(root, cx),
             None => this.cfg.root = None,
+        }
+
+        if this.cfg.check_updates {
+            this.check_for_update(false, cx);
         }
 
         // Fill the version picker with every release in the background.
@@ -552,6 +564,64 @@ impl Hopper {
 
     // ---------------------------------------------------------------- top bar
 
+    fn check_for_update(&mut self, manual: bool, cx: &mut Context<Self>) {
+        if matches!(self.updater, Updater::Checking | Updater::Installing(_)) {
+            return;
+        }
+        self.updater = Updater::Checking;
+        cx.spawn(async move |this, cx| {
+            let result = cx
+                .background_executor()
+                .spawn(async { update::check() })
+                .await;
+            this.update(cx, |this, cx| {
+                this.updater = match result {
+                    Ok(Some(u)) => {
+                        this.ok(format!("Hopper {} is available", u.tag));
+                        Updater::Available(u)
+                    }
+                    Ok(None) => Updater::UpToDate,
+                    // A failed automatic check stays quiet.
+                    Err(e) if manual => Updater::Failed(friendly(&e)),
+                    Err(_) => Updater::Idle,
+                };
+                cx.notify();
+            })
+            .ok();
+        })
+        .detach();
+        cx.notify();
+    }
+
+    fn install_update(&mut self, cx: &mut Context<Self>) {
+        let Updater::Available(u) = &self.updater else {
+            return;
+        };
+        let u = u.clone();
+        self.ok(format!("Downloading Hopper {}...", u.tag));
+        self.updater = Updater::Installing(u.clone());
+        cx.spawn(async move |this, cx| {
+            let result = cx
+                .background_executor()
+                .spawn(async move { update::install(&u) })
+                .await;
+            this.update(cx, |this, cx| match result {
+                Ok(path) => {
+                    cx.set_restart_path(path);
+                    cx.restart();
+                }
+                Err(e) => {
+                    this.fail(format!("Update failed: {}", friendly(&e)));
+                    this.updater = Updater::Failed(friendly(&e));
+                    cx.notify();
+                }
+            })
+            .ok();
+        })
+        .detach();
+        cx.notify();
+    }
+
     fn top_bar(&self, cx: &mut Context<Self>) -> impl IntoElement {
         // Versions found in the folder first, then every other release.
         let mut items = Vec::new();
@@ -611,9 +681,21 @@ impl Hopper {
                     .bg(rgb(BAR))
                     .border_b_2()
                     .border_color(rgb(BLACK))
-                    .child(ui::icon(Icon::Logo, 3.))
+                    .child(ui::app_icon(30.))
                     .child(ui::title("HOPPER", 22.))
                     .child(div().flex_1())
+                    .map(|bar| match &self.updater {
+                        Updater::Available(u) => bar.child(
+                            ui::gold_button("update", format!("Update to {}", u.tag))
+                                .on_click(cx.listener(|this, _, _, cx| this.install_update(cx))),
+                        ),
+                        Updater::Installing(u) => bar.child(
+                            div()
+                                .text_color(rgb(GOLD))
+                                .child(format!("Updating to {}...", u.tag)),
+                        ),
+                        _ => bar,
+                    })
                     .child(div().text_color(rgb(MUTED)).child("Install for"))
                     .child(self.dropdown(
                         Menu::Version,
@@ -1397,11 +1479,62 @@ impl Hopper {
             )
             .child(
                 section(vec![
-                    ui::icon(Icon::Logo, 3.).into_any_element(),
-                    row("Hopper", format!("Version {} | MIT license", env!("CARGO_PKG_VERSION"))).into_any_element(),
+                    ui::switch("auto-update", self.cfg.check_updates)
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            this.cfg.check_updates = !this.cfg.check_updates;
+                            this.cfg.save();
+                            cx.notify();
+                        }))
+                        .into_any_element(),
+                    row("Check for updates when Hopper starts", self.update_line()).into_any_element(),
+                    match &self.updater {
+                        Updater::Available(u) => ui::gold_button("options-update", format!("Update to {}", u.tag))
+                            .on_click(cx.listener(|this, _, _, cx| this.install_update(cx)))
+                            .into_any_element(),
+                        Updater::Checking | Updater::Installing(_) => {
+                            div().text_color(rgb(MUTED)).child("Working...").into_any_element()
+                        }
+                        Updater::Failed(_) => ui::button("download-page", "Download page")
+                            .on_click(cx.listener(|_, _, _, cx| cx.open_url(update::DOWNLOAD_PAGE)))
+                            .into_any_element(),
+                        _ => ui::button("check-update", "Check now")
+                            .on_click(cx.listener(|this, _, _, cx| this.check_for_update(true, cx)))
+                            .into_any_element(),
+                    },
+                ]),
+            )
+            .child(
+                section(vec![
+                    ui::app_icon(40.).into_any_element(),
+                    row("Hopper", format!("Version {} | MIT license", Self::version_label())).into_any_element(),
                     ui::button("repo", "GitHub").on_click(cx.listener(|_, _, _, cx| cx.open_url(REPO_URL))).into_any_element(),
                 ]),
             )
+    }
+
+    fn version_label() -> String {
+        update::current_tag().map_or_else(
+            || format!("{} (built from source)", env!("CARGO_PKG_VERSION")),
+            str::to_owned,
+        )
+    }
+
+    fn update_line(&self) -> String {
+        if update::current_tag().is_none() {
+            return "Only release builds can update themselves.".into();
+        }
+        match &self.updater {
+            Updater::Idle => "One click to download, install and restart.".into(),
+            Updater::Checking => "Checking GitHub for a new version...".into(),
+            Updater::UpToDate => {
+                format!("You're on the latest version ({}).", Self::version_label())
+            }
+            Updater::Available(u) => {
+                format!("{} is out. Hopper will restart after updating.", u.tag)
+            }
+            Updater::Installing(u) => format!("Installing {}...", u.tag),
+            Updater::Failed(e) => format!("Couldn't update: {e}"),
+        }
     }
 
     fn welcome(&self, cx: &mut Context<Self>) -> impl IntoElement {
@@ -1418,7 +1551,7 @@ impl Hopper {
                     .items_center()
                     .justify_center()
                     .gap_4()
-                    .child(ui::icon(Icon::Logo, 8.))
+                    .child(ui::app_icon(96.))
                     .child(ui::title("HOPPER", 40.))
                     .child("Couldn't find a Minecraft folder in the usual place.")
                     .child(
@@ -1507,6 +1640,15 @@ impl Render for Hopper {
                 )
             })
     }
+}
+
+enum Updater {
+    Idle,
+    Checking,
+    UpToDate,
+    Available(update::Update),
+    Installing(update::Update),
+    Failed(String),
 }
 
 enum MenuItem {

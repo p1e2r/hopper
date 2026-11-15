@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy policy — Hopper</title>
 <meta name="description" content="Hopper is a free, open-source Minecraft mod manager that attaches to your existing .minecraft folder. Mods, resource packs and shaders from Modrinth or your own files.">
@@ -19,8 +20,6 @@
   header { background: var(--bar); border-bottom: 2px solid var(--black); }
   .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
   header .wrap { display: flex; align-items: center; gap: 14px; padding-top: 14px; padding-bottom: 14px; }
-  .logo { width: 27px; height: 27px; display: grid; grid-template-columns: repeat(9, 3px); }
-  .logo i { width: 3px; height: 3px; display: block; }
   .title { position: relative; font-weight: bold; font-size: 24px; color: var(--gold); text-shadow: 3px 3px 0 #3f3410; letter-spacing: 1px; }
   header nav { margin-left: auto; display: flex; gap: 18px; font-size: 13px; }
   header nav a { color: var(--muted); text-decoration: none; }
@@ -63,7 +62,7 @@
 <div class="grass"></div>
 <header>
   <div class="wrap">
-    <div class="logo" id="logo" aria-hidden="true"></div>
+    <img src="icon.png" alt="" width="34" height="34" style="display:block">
     <div class="title">HOPPER</div>
     <nav>
       <a href="./">Download</a>
@@ -117,15 +116,6 @@
 </footer>
 
 <script>
-  // Pixel logo, same drawing as the app icon.
-  const rows = ["kkkkkkkkk","kmmmmmmmk","kmdddddmk","kmmmmmmmk",".kmmmmmk.","..kmmmk..","...kmk...","...kmk...","....k...."];
-  const colors = { k: "#1a1a1c", m: "#8c8c94", d: "#4a4a52" };
-  const logo = document.getElementById("logo");
-  for (const row of rows) for (const ch of row) {
-    const i = document.createElement("i");
-    if (colors[ch]) i.style.background = colors[ch];
-    logo.appendChild(i);
-  }
   // Show the current release tag.
   fetch("https://api.github.com/repos/p1e2r/hopper/releases/latest")
     .then(r => r.ok ? r.json() : null)

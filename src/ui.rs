@@ -58,6 +58,16 @@ pub fn grass_strip() -> impl IntoElement {
         .child(img(tex).w(px(1920.)).h(px(27.)).object_fit(ObjectFit::Fill))
 }
 
+/// The app icon, as shown in the dock/taskbar.
+pub fn app_icon(size: f32) -> impl IntoElement {
+    static TEX: OnceLock<Arc<Image>> = OnceLock::new();
+    let tex = texture(&TEX, include_bytes!("../assets/icon/icon.png"));
+    img(tex)
+        .flex_shrink_0()
+        .size(px(size))
+        .object_fit(ObjectFit::Contain)
+}
+
 /// Stone texture placed behind the sidebar.
 pub fn stone_backdrop() -> impl IntoElement {
     static TEX: OnceLock<Arc<Image>> = OnceLock::new();
@@ -126,6 +136,13 @@ pub fn button(id: impl Into<ElementId>, label: impl Into<SharedString>) -> State
 pub fn primary_button(id: impl Into<ElementId>, label: impl Into<SharedString>) -> Stateful<Div> {
     raised(id, 0x3f8a2a, 0x7fcf5b, 0x1f4a15, 0x4ea235)
         .child(label.into())
+        .0
+}
+
+/// Gold variant, for "update available".
+pub fn gold_button(id: impl Into<ElementId>, label: impl Into<SharedString>) -> Stateful<Div> {
+    raised(id, 0xc9a227, 0xffe680, 0x6b5410, 0xdcb43a)
+        .child(div().text_color(rgb(0x1a1400)).child(label.into()))
         .0
 }
 

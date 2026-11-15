@@ -16,9 +16,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # Decide the release tag first so every build can be stamped with it; the
+  # in-app updater compares that stamp with the latest release.
+  plan:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"   # not a release: no tag, no updater
+            exit 0
+          fi
+          version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          tag="v${version}"
+          # Same version as an earlier release: still publish, as a numbered build.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            tag="v${version}-build.${{ github.run_number }}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    permissions:
+      contents: read
+    env:
+      HOPPER_RELEASE_TAG: ${{ needs.plan.outputs.tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -57,8 +86,9 @@ jobs:
         run: |
           version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
           app=stage/Hopper.app/Contents
-          mkdir -p "$app/MacOS"
+          mkdir -p "$app/MacOS" "$app/Resources"
           cp target/${{ matrix.target }}/release/hopper "$app/MacOS/hopper"
+          cp assets/icon/icon.icns "$app/Resources/Hopper.icns"
           cat > "$app/Info.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -66,6 +96,7 @@ jobs:
             <key>CFBundleName</key><string>Hopper</string>
             <key>CFBundleDisplayName</key><string>Hopper</string>
             <key>CFBundleExecutable</key><string>hopper</string>
+            <key>CFBundleIconFile</key><string>Hopper</string>
             <key>CFBundleIdentifier</key><string>io.github.p1e2r.hopper</string>
             <key>CFBundlePackageType</key><string>APPL</string>
             <key>CFBundleShortVersionString</key><string>${version}</string>
@@ -89,6 +120,7 @@ jobs:
         run: |
           mkdir -p dist stage/hopper
           cp target/${{ matrix.target }}/release/hopper LICENSE README.md stage/hopper/
+          cp assets/icon/icon.png stage/hopper/hopper.png
           tar -czf "dist/${{ matrix.asset }}" -C stage hopper
 
       - uses: actions/upload-artifact@v4
@@ -97,7 +129,7 @@ jobs:
           path: dist/${{ matrix.asset }}
 
   release:
-    needs: build
+    needs: [plan, build]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -115,12 +147,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
-          tag="v${version}"
-          # Same version as an earlier release: still publish, as a numbered build.
-          if gh release view "$tag" >/dev/null 2>&1; then
-            tag="v${version}-build.${{ github.run_number }}"
-          fi
+          tag="${{ needs.plan.outputs.tag }}"
           ls -la release-files
           gh release create "$tag" release-files/* \
             --target "${{ github.sha }}" \

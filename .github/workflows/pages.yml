@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p public
           cp site/* public/
-          cp assets/fonts/Monocraft.ttf assets/textures/grass_strip.png public/
+          cp assets/fonts/Monocraft.ttf assets/textures/grass_strip.png assets/icon/favicon.png assets/icon/icon.png public/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
