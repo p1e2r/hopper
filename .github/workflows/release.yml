@@ -1,0 +1,122 @@
+name: release
+
+# Every push to main builds Hopper for macOS (Apple Silicon + Intel), Windows
+# and Linux and publishes a GitHub Release. Pull requests and the dev branch
+# only build and test.
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest, target: aarch64-apple-darwin, asset: Hopper-macos-apple-silicon.dmg }
+          - { os: macos-latest, target: x86_64-apple-darwin, asset: Hopper-macos-intel.dmg }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, asset: Hopper-windows-x64.exe }
+          - { os: ubuntu-22.04, target: x86_64-unknown-linux-gnu, asset: Hopper-linux-x64.tar.gz }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Linux libraries for GPUI
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libxcb1-dev \
+            libx11-xcb-dev libvulkan-dev libfontconfig-dev libfreetype-dev libssl-dev libasound2-dev clang
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Test
+        if: matrix.target != 'x86_64-apple-darwin'
+        run: cargo test --release --target ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package for macOS
+        if: runner.os == 'macOS'
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          app=stage/Hopper.app/Contents
+          mkdir -p "$app/MacOS"
+          cp target/${{ matrix.target }}/release/hopper "$app/MacOS/hopper"
+          cat > "$app/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>CFBundleName</key><string>Hopper</string>
+            <key>CFBundleDisplayName</key><string>Hopper</string>
+            <key>CFBundleExecutable</key><string>hopper</string>
+            <key>CFBundleIdentifier</key><string>io.github.p1e2r.hopper</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleShortVersionString</key><string>${version}</string>
+            <key>CFBundleVersion</key><string>${{ github.run_number }}</string>
+            <key>LSMinimumSystemVersion</key><string>11.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict></plist>
+          PLIST
+          codesign --force --deep -s - stage/Hopper.app
+          ln -s /Applications stage/Applications
+          mkdir -p dist
+          hdiutil create -volname Hopper -srcfolder stage -ov -format UDZO "dist/${{ matrix.asset }}"
+
+      - name: Package for Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: mkdir -p dist && cp target/${{ matrix.target }}/release/hopper.exe "dist/${{ matrix.asset }}"
+
+      - name: Package for Linux
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p dist stage/hopper
+          cp target/${{ matrix.target }}/release/hopper LICENSE README.md stage/hopper/
+          tar -czf "dist/${{ matrix.asset }}" -C stage hopper
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+
+  release:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          tag="v${version}"
+          # Same version as an earlier release: still publish, as a numbered build.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            tag="v${version}-build.${{ github.run_number }}"
+          fi
+          gh release create "$tag" assets/* \
+            --target "${{ github.sha }}" \
+            --title "Hopper ${tag#v}" \
+            --generate-notes \
+            --latest
