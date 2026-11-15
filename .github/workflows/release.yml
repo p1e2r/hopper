@@ -100,9 +100,10 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      # Not "assets/": that folder in the repo holds the app's fonts and textures.
       - uses: actions/download-artifact@v4
         with:
-          path: assets
+          path: release-files
           merge-multiple: true
 
       - name: Publish release
@@ -115,7 +116,8 @@ jobs:
           if gh release view "$tag" >/dev/null 2>&1; then
             tag="v${version}-build.${{ github.run_number }}"
           fi
-          gh release create "$tag" assets/* \
+          ls -la release-files
+          gh release create "$tag" release-files/* \
             --target "${{ github.sha }}" \
             --title "Hopper ${tag#v}" \
             --generate-notes \
