@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy — Hopper</title>
+<meta name="description" content="Hopper is a free, open-source Minecraft mod manager that attaches to your existing .minecraft folder. Mods, resource packs and shaders from Modrinth or your own files.">
+<style>
+  @font-face { font-family: Monocraft; src: url("Monocraft.ttf") format("truetype"); font-display: swap; }
+  :root {
+    --bg: #1c1c1f; --bar: #26262a; --black: #0a0a0b; --text: #f0f0f0; --muted: #9a9aa3;
+    --gold: #ffd84a; --green: #6cc349; --slot: #2e2e33; --slot-dark: #161618; --slot-light: #4a4a51;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 Monocraft, ui-monospace, monospace; image-rendering: pixelated; }
+  a { color: #7ab6e8; }
+  .grass { height: 27px; background: url("grass_strip.png") repeat-x; background-size: auto 27px; }
+  header { background: var(--bar); border-bottom: 2px solid var(--black); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+  header .wrap { display: flex; align-items: center; gap: 14px; padding-top: 14px; padding-bottom: 14px; }
+  .logo { width: 27px; height: 27px; display: grid; grid-template-columns: repeat(9, 3px); }
+  .logo i { width: 3px; height: 3px; display: block; }
+  .title { position: relative; font-weight: bold; font-size: 24px; color: var(--gold); text-shadow: 3px 3px 0 #3f3410; letter-spacing: 1px; }
+  header nav { margin-left: auto; display: flex; gap: 18px; font-size: 13px; }
+  header nav a { color: var(--muted); text-decoration: none; }
+  header nav a:hover { color: var(--text); }
+  .hero { padding: 56px 0 24px; text-align: center; }
+  .hero h1 { margin: 0 0 12px; font-size: 34px; text-shadow: 3px 3px 0 #2a2a2a; }
+  .hero p { margin: 0 auto; max-width: 640px; color: #c8c8d0; }
+  .version { margin-top: 14px; color: var(--muted); font-size: 12px; }
+  .downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 36px 0 12px; }
+  .btn { display: block; text-decoration: none; color: var(--text); background: var(--black); padding: 2px; }
+  .btn > span { display: block; background: #1f4a15; padding: 0 2px 3px 0; }
+  .btn > span > span { display: block; background: #7fcf5b; padding: 2px 0 0 2px; }
+  .btn > span > span > span { display: block; background: #3f8a2a; padding: 14px 12px; text-align: center; }
+  .btn:hover > span > span > span { background: #4ea235; }
+  .btn b { display: block; font-size: 15px; }
+  .btn small { display: block; color: #d8f5c8; font-size: 11px; margin-top: 2px; }
+  .btn.alt > span { background: #3c3c41; } .btn.alt > span > span { background: #a9a9b1; } .btn.alt > span > span > span { background: #6f6f76; }
+  .btn.alt:hover > span > span > span { background: #7f8aa8; }
+  .btn.alt small { color: #e2e2e8; }
+  .note { text-align: center; color: var(--muted); font-size: 12px; }
+  .slot { background: var(--slot-light); padding: 0 2px 2px 0; margin: 14px 0; }
+  .slot > div { background: var(--slot-dark); padding: 2px 0 0 2px; }
+  .slot > div > div { background: var(--slot); padding: 16px 18px; }
+  h2 { font-size: 18px; margin: 44px 0 6px; text-shadow: 2px 2px 0 #2a2a2a; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 14px; }
+  .features h3 { margin: 0 0 4px; font-size: 14px; color: var(--gold); }
+  .features p { margin: 0; color: #c8c8d0; font-size: 13px; }
+  .signing { border-left: 4px solid var(--green); }
+  code { background: var(--black); padding: 1px 5px; font-family: inherit; font-size: 12px; }
+  footer { margin-top: 56px; padding: 22px 0 40px; background: #111113; border-top: 2px solid var(--black); color: var(--muted); font-size: 12px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .policy { padding: 40px 0 0; }
+  .policy h1 { font-size: 26px; margin: 0 0 6px; text-shadow: 3px 3px 0 #2a2a2a; }
+  .policy p, .policy li { color: #c8c8d0; font-size: 13px; }
+  .policy ul { padding-left: 20px; }
+  .policy li { margin-bottom: 6px; }
+  .policy h2 { margin-top: 34px; }
+</style>
+</head>
+<body>
+<div class="grass"></div>
+<header>
+  <div class="wrap">
+    <div class="logo" id="logo" aria-hidden="true"></div>
+    <div class="title">HOPPER</div>
+    <nav>
+      <a href="./">Download</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/p1e2r/hopper">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap policy">
+  <h1>Privacy policy</h1>
+  <p style="color:var(--muted)">Applies to the Hopper desktop app and this website. Last updated 15 November 2026.</p>
+
+  <div class="slot"><div><div>
+    <p style="margin:0"><b style="color:var(--text)">Short version:</b> Hopper has no accounts, no analytics and no telemetry. The developer never receives any data from the app. The only service it talks to is Modrinth, to search for and download the things you ask for.</p>
+  </div></div></div>
+
+  <h2>What the app sends, and where</h2>
+  <p>Hopper only connects to <b>Modrinth</b> (<code>api.modrinth.com</code> and <code>cdn.modrinth.com</code>), in these cases:</p>
+  <ul>
+    <li><b>When it starts:</b> it downloads the list of Minecraft versions for the version picker.</li>
+    <li><b>When you search or browse:</b> it sends your search text, the type of content (mods, resource packs or shaders) and the Minecraft version and loader you picked.</li>
+    <li><b>When you install something:</b> it requests that project's files, and those of any required dependencies, and downloads them.</li>
+    <li><b>Recognising your files</b> (on by default, can be turned off in Options): it sends the SHA-1 hash of each mod, resource pack and shader file in your Minecraft folder so Modrinth can say which project each one belongs to. A hash is a fingerprint of a file; it does not contain the file's contents. File names, folder paths and the files themselves are never sent.</li>
+  </ul>
+  <p>Every request identifies itself as <code>hopper-mod-manager/&lt;version&gt;</code>, which Modrinth asks all apps to do. Like any website, Modrinth also sees your IP address. Their handling of that data is covered by <a href="https://modrinth.com/legal/privacy">Modrinth's privacy policy</a>.</p>
+
+  <h2>What stays on your computer</h2>
+  <ul>
+    <li>Your settings: the Minecraft folder you chose, the version and loader you picked, and your Options switches. They are saved in <code>hopper/config.json</code> in your system's settings folder and never leave your computer.</li>
+    <li>Everything Hopper does to files (installing, switching on or off, moving to the trash) happens in your Minecraft folder only.</li>
+  </ul>
+
+  <h2>Links</h2>
+  <p>Project pages, the GitHub link and similar buttons open in your web browser. What happens there is covered by that site's own policy.</p>
+
+  <h2>This website</h2>
+  <p>This site is hosted on GitHub Pages and loads the latest version number from GitHub's API. It uses no cookies, analytics or trackers of its own. GitHub may log visits, as described in <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>. Downloads are served from GitHub Releases.</p>
+
+  <h2>Code signing</h2>
+  <p>Windows builds are signed through SignPath (free code signing provided by <a href="https://about.signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>). Signing happens while the release is built; the app does not contact SignPath.</p>
+
+  <h2>Changes and contact</h2>
+  <p>Changes to this policy are made in the public <a href="https://github.com/p1e2r/hopper/blob/main/site/privacy.html">source code</a>, so every change is visible in its history. Questions can be asked by opening an <a href="https://github.com/p1e2r/hopper/issues">issue on GitHub</a>.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Hopper is MIT licensed.</span>
+    <a href="https://github.com/p1e2r/hopper">Source code</a>
+    <a href="https://github.com/p1e2r/hopper/blob/main/CODE_SIGNING_POLICY.md">Code signing policy</a>
+    <a href="privacy.html">Privacy policy</a>
+    <span>Font: Monocraft (OFL). Not affiliated with Mojang, Microsoft or Modrinth.</span>
+  </div>
+</footer>
+
+<script>
+  // Pixel logo, same drawing as the app icon.
+  const rows = ["kkkkkkkkk","kmmmmmmmk","kmdddddmk","kmmmmmmmk",".kmmmmmk.","..kmmmk..","...kmk...","...kmk...","....k...."];
+  const colors = { k: "#1a1a1c", m: "#8c8c94", d: "#4a4a52" };
+  const logo = document.getElementById("logo");
+  for (const row of rows) for (const ch of row) {
+    const i = document.createElement("i");
+    if (colors[ch]) i.style.background = colors[ch];
+    logo.appendChild(i);
+  }
+  // Show the current release tag.
+  fetch("https://api.github.com/repos/p1e2r/hopper/releases/latest")
+    .then(r => r.ok ? r.json() : null)
+    .then(r => { if (r && r.tag_name) document.getElementById("version").textContent = "Latest release: " + r.tag_name; })
+    .catch(() => {});
+</script>
+</body>
+</html>
