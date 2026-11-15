@@ -15,6 +15,12 @@ concurrency:
 
 jobs:
   build:
+    permissions:
+      contents: read
+      actions: read # SignPath reads the job and the artifact it signs
+    env:
+      # Signing turns on by itself once the SIGNPATH_API_TOKEN secret exists.
+      SIGNPATH_ENABLED: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -87,6 +93,34 @@ jobs:
           cp target/${{ matrix.target }}/release/hopper LICENSE README.md stage/hopper/
           tar -czf "dist/${{ matrix.asset }}" -C stage hopper
 
+      # Windows: when SignPath is set up, sign the exe before it is released.
+      - name: Upload unsigned Windows build
+        id: unsigned
+        if: runner.os == 'Windows' && env.SIGNPATH_ENABLED == 'true' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+
+      - name: Sign with SignPath
+        if: steps.unsigned.outcome == 'success'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          # Requests are approved by hand on SignPath; this is how long the job waits.
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: dist-signed
+
+      - name: Use the signed exe
+        if: steps.unsigned.outcome == 'success'
+        shell: bash
+        run: cp "dist-signed/${{ matrix.asset }}" "dist/${{ matrix.asset }}"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
@@ -104,6 +138,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: release-files
+          pattern: Hopper-*
           merge-multiple: true
 
       - name: Publish release

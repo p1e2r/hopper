@@ -41,6 +41,12 @@ version in `Cargo.toml` (`v0.3.0`). If that version was already released, the bu
 published as `v0.3.0-build.N`, so bump the version in `Cargo.toml` for a clean tag.
 Pushes to `dev` and pull requests only build and test.
 
+## Code signing
+
+Windows builds will be signed through SignPath: free code signing provided by
+[SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+See [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+
 ## Credits
 
 - Pixel font: [Monocraft](https://github.com/IdreesInc/Monocraft) by Idrees Hassan, SIL Open Font License 1.1 (`assets/fonts/OFL.txt`)
