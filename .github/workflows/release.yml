@@ -115,6 +115,23 @@ jobs:
         shell: bash
         run: mkdir -p dist && cp target/${{ matrix.target }}/release/hopper.exe "dist/${{ matrix.asset }}"
 
+      # The setup program; the plain .exe above stays as the portable build
+      # (and is what the in-app updater downloads).
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          $version = if ($env:HOPPER_RELEASE_TAG) { $env:HOPPER_RELEASE_TAG.TrimStart('v') } else { (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value }
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" installer\hopper.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: Hopper-windows-x64-setup.exe
+          path: dist/Hopper-windows-x64-setup.exe
+
       - name: Package for Linux
         if: runner.os == 'Linux'
         run: |

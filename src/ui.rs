@@ -80,7 +80,7 @@ pub fn stone_backdrop() -> impl IntoElement {
         .overflow_hidden()
         .child(
             img(tex)
-                .w(px(216.))
+                .w(px(288.))
                 .h(px(1680.))
                 .object_fit(ObjectFit::Fill),
         )

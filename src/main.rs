@@ -842,9 +842,10 @@ impl Hopper {
                         .hover(|s| s.bg(rgba(0xffffff14)).border_color(rgb(0x55555c)))
                 })
                 .child(ui::icon(icon, 2.))
-                .child(div().flex_1().child(label))
+                .child(div().flex_1().min_w_0().truncate().child(label))
                 .children(count.map(|c| {
                     div()
+                        .flex_shrink_0()
                         .text_size(px(11.))
                         .text_color(rgb(if active { 0xd8f5c8 } else { MUTED }))
                         .child(c)
@@ -894,7 +895,7 @@ impl Hopper {
             ));
         div()
             .relative()
-            .w(px(210.))
+            .w(px(256.))
             .flex_shrink_0()
             .overflow_hidden()
             .border_r_2()

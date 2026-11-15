@@ -9,12 +9,21 @@ Get it from the [download page](https://p1e2r.github.io/hopper/) or [Releases](h
 
 | Platform | File |
 | --- | --- |
+| Windows | `Hopper-windows-x64-setup.exe` (installer) or `Hopper-windows-x64.exe` (portable) |
 | macOS, Apple Silicon | `Hopper-macos-apple-silicon.dmg` |
 | macOS, Intel | `Hopper-macos-intel.dmg` |
-| Windows | `Hopper-windows-x64.exe` |
 | Linux | `Hopper-linux-x64.tar.gz` |
 
-The macOS app isn't notarized: the first time, right-click it and choose **Open**.
+On macOS or Linux you can also install with one command (no sudo; on Mac it skips the
+"unidentified developer" prompt, on Linux it adds Hopper to your app menu):
+
+```sh
+curl -fsSL https://p1e2r.github.io/hopper/install.sh | sh
+```
+
+The Windows installer installs for your user only (no admin prompt), adds a Start menu
+entry and an uninstaller. If you use the `.dmg` directly, right-click the app and choose
+**Open** the first time.
 
 ## Features
 

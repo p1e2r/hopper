@@ -75,12 +75,19 @@
 
   <section id="download">
     <div class="downloads">
-      <a class="btn" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-windows-x64.exe"><span><span><span><b>Windows</b><small>64-bit .exe</small></span></span></span></a>
+      <a class="btn" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-windows-x64-setup.exe"><span><span><span><b>Windows</b><small>Installer</small></span></span></span></a>
       <a class="btn" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-macos-apple-silicon.dmg"><span><span><span><b>macOS</b><small>Apple Silicon .dmg</small></span></span></span></a>
       <a class="btn alt" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-macos-intel.dmg"><span><span><span><b>macOS</b><small>Intel .dmg</small></span></span></span></a>
       <a class="btn alt" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-linux-x64.tar.gz"><span><span><span><b>Linux</b><small>x64 .tar.gz</small></span></span></span></a>
     </div>
-    <p class="note">All versions and release notes: <a href="https://github.com/p1e2r/hopper/releases">GitHub Releases</a>. On macOS, right-click the app and choose Open the first time.</p>
+    <div class="slot"><div><div>
+      <p style="margin:0 0 8px"><b>Mac or Linux? Install with one command</b> <span style="color:var(--muted)">(no right-click needed on Mac, adds an app-menu entry on Linux)</span></p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <code id="cmd" style="flex:1;min-width:260px;padding:8px 10px;font-size:13px;user-select:all">curl -fsSL https://p1e2r.github.io/hopper/install.sh | sh</code>
+        <a class="btn alt" href="#" id="copy" style="min-width:110px"><span><span><span><b style="font-size:13px">Copy</b></span></span></span></a>
+      </div>
+    </div></div></div>
+    <p class="note">Prefer no installer? Get the <a href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-windows-x64.exe">portable Windows .exe</a>. All versions and release notes: <a href="https://github.com/p1e2r/hopper/releases">GitHub Releases</a>. If you use the .dmg instead of the command, right-click the app and choose Open the first time.</p>
   </section>
 
   <h2>What it does</h2>
@@ -105,6 +112,12 @@
 </footer>
 
 <script>
+  document.getElementById("copy").addEventListener("click", e => {
+    e.preventDefault();
+    navigator.clipboard.writeText(document.getElementById("cmd").textContent).then(() => {
+      e.currentTarget.querySelector("b").textContent = "Copied";
+    }).catch(() => {});
+  });
   // Show the current release tag.
   fetch("https://api.github.com/repos/p1e2r/hopper/releases/latest")
     .then(r => r.ok ? r.json() : null)

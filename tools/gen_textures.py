@@ -48,7 +48,7 @@ def grass_strip(path, w=640, h=9):
     save(rows, w, h, path)
 
 
-def stone(path, w=72, h=560):
+def stone(path, w=96, h=560):
     rng = random.Random(11)
     base = (44, 44, 49)
     rows = [[jitter(rng, base, 5) for _ in range(w)] for _ in range(h)]
