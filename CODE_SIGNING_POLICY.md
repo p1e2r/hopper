@@ -7,6 +7,7 @@ Free code signing provided by [SignPath.io](https://about.signpath.io), certific
 Only the Windows executable, `Hopper-windows-x64.exe`, is signed. It is built by GitHub
 Actions (`.github/workflows/release.yml`) on GitHub-hosted runners from the `main` branch of
 this public repository and published on the
+[download page](https://p1e2r.github.io/hopper/) and the
 [Releases](https://github.com/p1e2r/hopper/releases) page. Nothing built anywhere else is
 submitted for signing.
 

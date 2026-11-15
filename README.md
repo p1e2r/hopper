@@ -5,7 +5,7 @@ No instances, no accounts, no launcher: it manages `mods/`, `resourcepacks/` and
 
 ## Download
 
-Grab the latest build from [Releases](https://github.com/p1e2r/hopper/releases/latest):
+Get it from the [download page](https://p1e2r.github.io/hopper/) or [Releases](https://github.com/p1e2r/hopper/releases/latest):
 
 | Platform | File |
 | --- | --- |

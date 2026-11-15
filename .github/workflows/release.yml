@@ -6,6 +6,8 @@ name: release
 on:
   push:
     branches: [main, dev]
+    # The download page has its own workflow; changing it isn't a new release.
+    paths-ignore: ["site/**", ".github/workflows/pages.yml"]
   pull_request:
   workflow_dispatch:
 
@@ -155,5 +157,6 @@ jobs:
           gh release create "$tag" release-files/* \
             --target "${{ github.sha }}" \
             --title "Hopper ${tag#v}" \
+            --notes-file .github/release-notes.md \
             --generate-notes \
             --latest

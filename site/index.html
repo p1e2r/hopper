@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hopper — Minecraft mod manager</title>
+<meta name="description" content="Hopper is a free, open-source Minecraft mod manager that attaches to your existing .minecraft folder. Mods, resource packs and shaders from Modrinth or your own files.">
+<style>
+  @font-face { font-family: Monocraft; src: url("Monocraft.ttf") format("truetype"); font-display: swap; }
+  :root {
+    --bg: #1c1c1f; --bar: #26262a; --black: #0a0a0b; --text: #f0f0f0; --muted: #9a9aa3;
+    --gold: #ffd84a; --green: #6cc349; --slot: #2e2e33; --slot-dark: #161618; --slot-light: #4a4a51;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 Monocraft, ui-monospace, monospace; image-rendering: pixelated; }
+  a { color: #7ab6e8; }
+  .grass { height: 27px; background: url("grass_strip.png") repeat-x; background-size: auto 27px; }
+  header { background: var(--bar); border-bottom: 2px solid var(--black); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+  header .wrap { display: flex; align-items: center; gap: 14px; padding-top: 14px; padding-bottom: 14px; }
+  .logo { width: 27px; height: 27px; display: grid; grid-template-columns: repeat(9, 3px); }
+  .logo i { width: 3px; height: 3px; display: block; }
+  .title { position: relative; font-weight: bold; font-size: 24px; color: var(--gold); text-shadow: 3px 3px 0 #3f3410; letter-spacing: 1px; }
+  header nav { margin-left: auto; display: flex; gap: 18px; font-size: 13px; }
+  header nav a { color: var(--muted); text-decoration: none; }
+  header nav a:hover { color: var(--text); }
+  .hero { padding: 56px 0 24px; text-align: center; }
+  .hero h1 { margin: 0 0 12px; font-size: 34px; text-shadow: 3px 3px 0 #2a2a2a; }
+  .hero p { margin: 0 auto; max-width: 640px; color: #c8c8d0; }
+  .version { margin-top: 14px; color: var(--muted); font-size: 12px; }
+  .downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 36px 0 12px; }
+  .btn { display: block; text-decoration: none; color: var(--text); background: var(--black); padding: 2px; }
+  .btn > span { display: block; background: #1f4a15; padding: 0 2px 3px 0; }
+  .btn > span > span { display: block; background: #7fcf5b; padding: 2px 0 0 2px; }
+  .btn > span > span > span { display: block; background: #3f8a2a; padding: 14px 12px; text-align: center; }
+  .btn:hover > span > span > span { background: #4ea235; }
+  .btn b { display: block; font-size: 15px; }
+  .btn small { display: block; color: #d8f5c8; font-size: 11px; margin-top: 2px; }
+  .btn.alt > span { background: #3c3c41; } .btn.alt > span > span { background: #a9a9b1; } .btn.alt > span > span > span { background: #6f6f76; }
+  .btn.alt:hover > span > span > span { background: #7f8aa8; }
+  .btn.alt small { color: #e2e2e8; }
+  .note { text-align: center; color: var(--muted); font-size: 12px; }
+  .slot { background: var(--slot-light); padding: 0 2px 2px 0; margin: 14px 0; }
+  .slot > div { background: var(--slot-dark); padding: 2px 0 0 2px; }
+  .slot > div > div { background: var(--slot); padding: 16px 18px; }
+  h2 { font-size: 18px; margin: 44px 0 6px; text-shadow: 2px 2px 0 #2a2a2a; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 14px; }
+  .features h3 { margin: 0 0 4px; font-size: 14px; color: var(--gold); }
+  .features p { margin: 0; color: #c8c8d0; font-size: 13px; }
+  .signing { border-left: 4px solid var(--green); }
+  code { background: var(--black); padding: 1px 5px; font-family: inherit; font-size: 12px; }
+  footer { margin-top: 56px; padding: 22px 0 40px; background: #111113; border-top: 2px solid var(--black); color: var(--muted); font-size: 12px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+</style>
+</head>
+<body>
+<div class="grass"></div>
+<header>
+  <div class="wrap">
+    <div class="logo" id="logo" aria-hidden="true"></div>
+    <div class="title">HOPPER</div>
+    <nav>
+      <a href="#download">Download</a>
+      <a href="#signing">Code signing</a>
+      <a href="https://github.com/p1e2r/hopper">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Mods, packs and shaders, sorted.</h1>
+    <p>Hopper is a free, open-source Minecraft mod manager that latches onto the Minecraft folder you already have. Pick your version and loader, grab things from Modrinth or drop in your own files, and switch anything on or off.</p>
+    <div class="version" id="version">Latest release</div>
+  </section>
+
+  <section id="download">
+    <div class="downloads">
+      <a class="btn" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-windows-x64.exe"><span><span><span><b>Windows</b><small>64-bit .exe</small></span></span></span></a>
+      <a class="btn" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-macos-apple-silicon.dmg"><span><span><span><b>macOS</b><small>Apple Silicon .dmg</small></span></span></span></a>
+      <a class="btn alt" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-macos-intel.dmg"><span><span><span><b>macOS</b><small>Intel .dmg</small></span></span></span></a>
+      <a class="btn alt" href="https://github.com/p1e2r/hopper/releases/latest/download/Hopper-linux-x64.tar.gz"><span><span><span><b>Linux</b><small>x64 .tar.gz</small></span></span></span></a>
+    </div>
+    <p class="note">All versions and release notes: <a href="https://github.com/p1e2r/hopper/releases">GitHub Releases</a>. On macOS, right-click the app and choose Open the first time.</p>
+  </section>
+
+  <h2>What it does</h2>
+  <div class="features">
+    <div class="slot"><div><div><h3>Uses your folder</h3><p>Finds your <code>.minecraft</code> folder on its own. No instances, no accounts, no launcher.</p></div></div></div>
+    <div class="slot"><div><div><h3>Right version, every time</h3><p>Pick your Minecraft version and Fabric, Quilt, Forge or NeoForge. Every download, dependencies included, matches it.</p></div></div></div>
+    <div class="slot"><div><div><h3>Recognises your mods</h3><p>Files you already have are matched on Modrinth and shown by their real names, with links.</p></div></div></div>
+    <div class="slot"><div><div><h3>On/off switches</h3><p>Turn mods, resource packs and shaders off without deleting them. Removed files go to the trash.</p></div></div></div>
+    <div class="slot"><div><div><h3>Modrinth built in</h3><p>Search and install mods, resource packs and shaders in one click.</p></div></div></div>
+    <div class="slot"><div><div><h3>Your own files too</h3><p>Drop <code>.jar</code> and <code>.zip</code> files on the window and Hopper sorts them into the right folder.</p></div></div></div>
+  </div>
+
+  <h2 id="signing">Code signing</h2>
+  <div class="slot signing"><div><div>
+    <p style="margin:0 0 8px">This project uses the <a href="https://signpath.org">SignPath Foundation</a> for code signing.</p>
+    <p style="margin:0 0 8px"><b>Free code signing provided by <a href="https://about.signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>.</b></p>
+    <p style="margin:0;color:#c8c8d0;font-size:13px">The Windows executable is built by GitHub Actions from the public <a href="https://github.com/p1e2r/hopper">source code</a> and signed only after manual approval. See the <a href="https://github.com/p1e2r/hopper/blob/main/CODE_SIGNING_POLICY.md">code signing policy</a> for roles and privacy details.</p>
+  </div></div></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Hopper is MIT licensed.</span>
+    <a href="https://github.com/p1e2r/hopper">Source code</a>
+    <a href="https://github.com/p1e2r/hopper/blob/main/CODE_SIGNING_POLICY.md">Code signing policy</a>
+    <span>Font: Monocraft (OFL). Not affiliated with Mojang, Microsoft or Modrinth.</span>
+  </div>
+</footer>
+
+<script>
+  // Pixel logo, same drawing as the app icon.
+  const rows = ["kkkkkkkkk","kmmmmmmmk","kmdddddmk","kmmmmmmmk",".kmmmmmk.","..kmmmk..","...kmk...","...kmk...","....k...."];
+  const colors = { k: "#1a1a1c", m: "#8c8c94", d: "#4a4a52" };
+  const logo = document.getElementById("logo");
+  for (const row of rows) for (const ch of row) {
+    const i = document.createElement("i");
+    if (colors[ch]) i.style.background = colors[ch];
+    logo.appendChild(i);
+  }
+  // Show the current release tag.
+  fetch("https://api.github.com/repos/p1e2r/hopper/releases/latest")
+    .then(r => r.ok ? r.json() : null)
+    .then(r => { if (r && r.tag_name) document.getElementById("version").textContent = "Latest release: " + r.tag_name; })
+    .catch(() => {});
+</script>
+</body>
+</html>
